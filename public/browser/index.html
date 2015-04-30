@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title>Browser - Roosa</title>
+		<script type="text/javascript" src="/browser/js/libs/jsonld.js"></script>
+		<script type="text/javascript" src="/browser/js/libs/jquery.js"></script>
+		<script type="text/javascript" src="/browser/js/libs/underscore.js"></script>
+		<script type="text/javascript" src="/browser/js/libs/backbone.js"></script>
+		<script type="text/javascript" src="/browser/js/libs/bootstrap.js"></script>
+		<script type="text/javascript" src="/browser/js/browser.js"></script>
+		<link href="/browser/css/bootstrap.css" rel="stylesheet">
+		<style type="text/css">
+			body {
+				padding-top: 60px;
+				padding-bottom: 40px;
+			}
+		</style>
+	</head>	
+	<body>
+
+		<div class="navbar navbar-fixed-top">
+      		<div class="navbar-inner">
+        		<div class="container">
+          			<a class="brand" href="/browser/">Roosa Browser</a>
+	        	</div>
+		    </div>
+		</div>
+
+		<div class="container">
+			<div class="row">
+				<div class="span4">
+					<div id="directory"></div>
+				</div>
+				<div class="span8" id="main"></div>
+			</div>
+		</div>
+
+		<script id="directory-template" type="text/template">
+			<ul class="nav nav-list">
+			 	<% resources.forEach(function(uri) { %>
+			 		<li><a href="#" class="action-resource" data-uri="<%= uri.replace('#', '%23') %>"><%= uri %></a></li>
+			 	<% }) %>
+			</ul>
+		</script>
+
+		<script id="resource-template" type="text/template">
+			<h2><%= uri %></h2>
+			<% if(jsonld['@graph']) { %>
+				<ul>
+					<% jsonld['@graph'].forEach(function(triple) { %>
+						<% if(triple['@id']) { %>
+							<li><code><%= uri %> <%= triple['@id'] %></code></li>
+						<% } %>
+					<% }) %>
+				</ul>
+			<% } %>
+		</script>
+	</body>
+</html>

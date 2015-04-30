@@ -1,0 +1,240 @@
+<!doctype html>
+<html>
+<head> 
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>RESTful 2012 Presentation</title> 
+    <link rel="stylesheet" type="text/css" media="screen, projection, print" 
+     href="QuickSlides/slidy.css" />
+    <link rel="stylesheet" type="text/css" media="screen, projection, print" 
+     href="QuickSlides/style.css" />
+    <script src="QuickSlides/showdown.js"></script>
+    <script src="QuickSlides/slidy.js"></script>
+    
+</head>
+<body>
+<script type=text/markdown>
+<!--
+
+# Exposing RDF models via a RESTful Interface
+
+Presentation at RESTful Application Design Seminar at TUT
+
+27.3.2012
+
+Juha Nurmi
+
+Jaakko Salonen
+
+Tampere University of Technology
+
+Hypermedia Laboratory / SmartSimulators Research Group
+
+---
+
+# Overview
+
+- Introduction
+- Overview of the design approach
+- Small examples
+- Walkthrough of a more complete example illustrating the use of the technology
+- Evaluation (benefits, drawbacks, general usefulness of the approach, possible measurements, ...)
+- Summary
+
+---
+
+# Introduction
+
+- RDF (Resource Description Framework). Official W3C recommendation for Semantic Web data models.
+- A graph-based data model. Data is organized in triples in *subject-predicate-object* format.
+- Resources are identified with URIs (Uniform Resource Identifiers)
+- Distributed, reifiable
+- Serialization formats: RDF/XML, N3, Turtle
+- Data models are often persisted with specialized triplestores
+- Reasoners and rule engines can be added on top. There is also OWL (Web Ontology Language).
+
+---
+
+# RDF Modeling Example (1/2)
+
+Let's model *"John is knows Mary"* in RDF.
+
+Triples:
+
+    <http://example.com/people#John>
+        <http://purl.org/dc/elements/1.1/title>
+            "John"
+
+    <http://example.com/people#John>
+        <http://xmlns.com/foaf/0.1/knows>
+            <http://example.com/people#Mary>.
+
+Graph visualization:
+
+![Graph: John](john-graph.png)
+
+---
+
+# RDF Modeling Example (2/2)
+
+RDF/XML serialization:
+
+    <?xml version="1.0"?>
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+      xmlns:foaf="http://xmlns.com/foaf/0.1/">
+      <rdf:Description rdf:about="http://example.com/people#John">
+        <dc:title>John</dc:title> 
+        <foaf:knows rdf:resource="http://example.com/people#Mary"/>
+      </rdf:Description>
+    </rdf:RDF>
+
+N3:
+
+    @prefix foaf: <http://xmlns.com/foaf/0.1/>.
+    @prefix dc: <http://purl.org/dc/elements/1.1/>.
+    @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+    <http://example.com/people#John> dc:title "John";
+        foaf:knows <http://example.com/people#Mary>.
+ 
+Note: just like in N3, prefixes are commonly used to simplify representations
+(full URIs can still be resolved).
+
+---
+
+# Overview of the design approach
+
+- RDF models are commonly accessed with native APIs and SPARQL query interfaces. Problems:
+ - Native APIs are bound to specific technologies (often Java) -> tight coupling
+ - SPARQL is standardized, but query-oriented
+- Our approach was to implement a RESTful API for accessing RDF data:
+ - Organize triples into resources
+ - Manipulate the underlying graph by using standard HTTP verbs and resources
+
+![Rough schematics illustration](rough-schematics.png)
+
+---
+
+# Results
+
+- Open source RESTful RDF server
+- Implemented with Python, Flask and rdflib
+- Right now only supports JSON
+- Also added unit testing
+- For demonstration purposes, implemented a JavaScript client for managing and browsing the graph
+(on top of Arbor.js)
+
+Let's make a short walkthrough
+
+---
+
+# Examples
+
+To demonstrate the server, we loaded it with W3C's Wine Ontology, a well known example OWL
+ontology: <http://www.w3.org/TR/owl-guide/wine.rdf>
+
+Start the server:
+
+    `python app.py`
+
+Runs on `localhost:8080`. Check frontpage.
+
+---
+
+# Examples: REST API Methods (1/2)
+
+**HTTP GET**
+
+    curl -X GET http://localhost:8080/api/instances/vin:Foxen
+
+    200 OK
+
+    {"data": [["rdf:type", "vin:Winery"]],
+     "backlinks": [["vin:FoxenCheninBlanc", "vin:hasMaker"],
+     ["_:ESouuNdS435", "rdf:first"]]}
+
+**HTTP DELETE**
+
+    curl -X DELETE http://localhost:8080/api/instances/vin:Winery
+
+    200 Deleted
+
+---
+
+# Example: REST API Methods (2/2)
+
+`foxen2.json`:
+
+    {"data": [["rdf:type", "vin:Winery"]],
+     "backlinks": [["vin:FoxenCheninBlanc", "vin:hasMaker"]]}
+
+**HTTP PUT**
+
+    curl -v -H "Content-Type: application/json"
+    -X POST --data "@foxen2.json"
+    http://localhost:8080/api/instances/vin:Foxen2
+
+    200 OK
+
+---
+
+# Proof-of-concept JavaScript Client
+
+- Implemented with JavaScript, jQuery and arbor.js
+- Uses JSON data from the server
+- Can be used to managing and browsing the graph:
+ - Shows a part of the graph 
+ - Leafnodes are hyperlinks to other parts of the graph
+ - To add subjects, predicates and objects (POST or PUT)
+ - To delete subjects, predicates and objects (DELETE)
+
+---
+
+# Evaluation
+
+Successfully created REST API and example client
+
+- Basic RDF model manipulation via standard HTTP methods (GET, PUT, DELETE)
+  - Any client supporting them can use the API
+  - We did not (yet) implement POST or PATCH
+- Resource-oriented way to access RDF models
+
+---
+
+# Evaluation - Issues to be Resolved
+
+- Does not fully support RDF model. Matters to be resolved:
+ - Support for full URIs (only `prefix:name` works right now)
+ - Prefix management interface (find to what URIs prefixies are bound to)
+ - Blank node and reification support
+- Complex queries should be done with SPARQL (SPARQL API also needed)
+- Performance. It has been only preliminarily tested
+- Some bugs related to arbor.js 
+- We should also see how we relate to [SPARQL 1.1 Graph Store HTTP Protocol](http://www.w3.org/TR/sparql11-http-rdf-update/)
+
+---
+
+# Summary
+
+- Successfully implemented RESTful RDF server and example client
+- There is still work to be done, but it all looks very promising
+- Client is useful for viewing and creating RDF models
+- Actual queries to the RDF database should be done with query language
+
+-->
+</script>
+<script>
+var scripts = document.getElementsByTagName('script');
+for (var i = 0; i < scripts.length; i++){
+    var script = scripts[i];
+    if (script.type != 'text/markdown') continue;
+    var md = script.innerHTML.replace(/^\s<!--*/, '')
+        .replace(/-->\s*$/, '');
+    var markup = new Showdown.converter().makeHtml(md);
+    var slides = markup.split('<hr />');
+    for (var j = 0; j < slides.length; j++)
+        document.write('<div class=slide>' + slides[j] + '</div>');
+}
+w3c_slidy.add_listener(document.body, "touchend", w3c_slidy.mouse_button_click);
+</script>
+</body>
+</html>

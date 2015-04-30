@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style type="text/css">
+		a {
+			text-decoration: none;
+		}
+		code, pre, li {
+			font-family: "Consolas", "Courier New", sans-serif;
+		}
+		pre {
+			font-size: 12px;
+		}
+	</style>
+</head>
+<body>
+	{% if uri %}
+		<h1><code>{{uri}}</code></h1>
+		<h2>Properties</h2>
+		{% if resource['data'] %}
+			{% for p, o in resource['data'] %}
+			    <pre>{{"%40s" % uri}}  {{"{0:-^50}".format(p)}}&gt;  <a href="/browser/{{o}}">{{"%40s" % o}}</a></pre>
+			{% endfor %}
+		{% else %}
+			-
+		{% endif %}
+
+		<h2>Backlinks</h2>
+		{% if resource['backlinks'] %}
+			{% for s, p in resource['backlinks'] %}
+			    <pre>{{"%40s" % uri}}  &lt;{{"{0:-^50}".format(s)}}  <a href="/browser/{{s}}">{{"%40s" % s}}</a></pre>
+			{% endfor %}
+		{% else %}
+			-
+		{% endif %}
+	{% else %}
+		<h2>Resources</h2>
+		<ul>
+		{% for name in resources %}
+			<li><a href="/browser/{{name}}">{{name}} {{resources[name]['triples']}}</a></li>
+		{% endfor %}
+		</ul>
+	{% endif %}
+</body>
+</html>

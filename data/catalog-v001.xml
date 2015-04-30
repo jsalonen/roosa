@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <group id="Folder Repository, directory=file:/C:/Users/Jaakko/work/restful2012/data/, recursive=true, Auto-Update=true, version=2" prefer="public" xml:base="">
+        <uri id="Automatically generated entry, Timestamp=1331216591616" name="duplicate:http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#" uri="wine-modified.rdf"/>
+        <uri id="Automatically generated entry, Timestamp=1331216591616" name="duplicate:http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#" uri="wine.rdf"/>
+    </group>
+</catalog>
