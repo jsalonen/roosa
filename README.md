@@ -24,14 +24,6 @@ Install dependencies into virtualenv:
 
 	pip install -r requirements.txt
 
-Additionally, you need to manually install [rdflib-jsonld](https://github.com/RDFLib/rdflib-jsonld):
-
-	git clone https://github.com/RDFLib/rdflib-jsonld.git
-	cd rdflib-jsonld
-	python setup.py install
-
-You are done!
-
 Launch Roosa server (in test mode) by invoking:
 
 	python roosa.py

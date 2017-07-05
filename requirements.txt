@@ -1,4 +1,5 @@
 rdflib>=3.2.1
+rdflib-jsonld==0.4.0
 rdfextras>=0.2
 flask>=0.8
 flask_rest>=1.1
